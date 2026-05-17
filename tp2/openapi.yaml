@@ -1,0 +1,287 @@
+openapi: 3.1.0
+
+info:
+  title: Projects and Users API
+  version: 1.0.0
+  description: API para la gestión de proyectos y usuarios asignados a proyectos.
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Projects
+    description: Operaciones relacionadas con proyectos
+
+  - name: Users
+    description: Operaciones relacionadas con usuarios asignados a proyectos
+
+paths:
+
+  /projects:
+    get:
+      summary: Obtener todos los proyectos
+      operationId: getProjects
+      tags:
+        - Projects
+
+      responses:
+        '200':
+          description: Lista de proyectos obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+
+    post:
+      summary: Crear un proyecto
+      operationId: createProject
+      tags:
+        - Projects
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+
+      responses:
+        '201':
+          description: Proyecto creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{id}/users:
+    get:
+      summary: Obtener usuarios de un proyecto
+      operationId: getProjectUsers
+      tags:
+        - Users
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del proyecto
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+        '200':
+          description: Lista de usuarios del proyecto obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '404':
+          description: Proyecto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Crear un usuario dentro de un proyecto
+      operationId: createProjectUser
+      tags:
+        - Users
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del proyecto
+          schema:
+            type: integer
+            example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+
+      responses:
+        '201':
+          description: Usuario creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '404':
+          description: Proyecto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{id}/users/{userId}:
+    delete:
+      summary: Eliminar usuario de un proyecto
+      operationId: deleteProjectUser
+      tags:
+        - Users
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del proyecto
+          schema:
+            type: integer
+            example: 1
+
+        - name: userId
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: integer
+            example: 10
+
+      responses:
+        '204':
+          description: Usuario eliminado correctamente
+
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '404':
+          description: Proyecto o usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+
+  schemas:
+
+    Project:
+      type: object
+      required:
+        - id
+        - name
+
+      properties:
+        id:
+          type: integer
+          example: 1
+
+        name:
+          type: string
+          example: Proyecto de Migración
+
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - project_id
+
+      properties:
+        id:
+          type: integer
+          example: 10
+
+        name:
+          type: string
+          example: Juan Pérez
+
+        birthdate:
+          type:
+            - string
+            - 'null'
+          format: date
+          example: '1990-10-21'
+
+        project_id:
+          type: integer
+          example: 1
+
+    CreateProjectRequest:
+      type: object
+      required:
+        - name
+
+      properties:
+        name:
+          type: string
+          example: Plataforma de IA
+
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+
+      properties:
+        name:
+          type: string
+          example: Juan Pérez
+
+        birthdate:
+          type:
+            - string
+            - 'null'
+          format: date
+          example: '1990-10-21'
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+
+      properties:
+        message:
+          type: string
+          example: Ocurrió un error al procesar la solicitud
